@@ -4,90 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tic Tac Toe</title>
-    <style>
-        body {
-            background: rgb(20,36,0);
-            background: linear-gradient(90deg, rgba(20,36,0,1) 0%, rgba(0,212,255,1) 0%, rgba(189,172,125,1) 0%);
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #eeff00;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        h1 {
-            margin-bottom: 20px;
-        }
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
-            gap: 5px;
-            justify-content: center;
-        }
-        .cell {
-        
-            width: 100%;
-            height: 100%;
-            background-color: #e7faff;
-            border: 10px solid #8e8e8e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 70px;
-            font-weight:bolder;
-            cursor: pointer;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-style: inherit;
-        }
-        .cell.taken {
-            pointer-events: none;
-        }
-        #message {
-            margin-top: 20px;
-            font-size: 25px;
-            font-weight: bold;
-        }
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #0053ad;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Tic Tac Toe</h1>
-    <div class="board" id="board"></div>
-    <div id="message"></div>
-    <button id="restart">Restart</button>
+<body class="bg-gradient-to-r from-green-900 via-cyan-500 to-yellow-500 flex flex-col items-center justify-center h-screen">
+    <h1 class="text-5xl font-extrabold mb-8 text-white drop-shadow-lg">Tic Tac Toe</h1>
+    <div id="board" class="grid grid-cols-3 gap-3 p-4 bg-white/20 rounded-lg shadow-lg"></div>
+    <div id="message" class="mt-6 text-3xl font-semibold text-white bg-black/40 px-4 py-2 rounded-lg shadow-md"></div>
+    <button id="restart" class="mt-6 px-8 py-4 bg-blue-700 text-white text-lg font-bold rounded-lg shadow-lg hover:bg-blue-800 transition-all duration-300">Restart</button>
 
     <script>
         const board = Array(9).fill(' ');
         const boardElement = document.getElementById('board');
         const messageElement = document.getElementById('message');
         const restartButton = document.getElementById('restart');
+        let isPlayerTurn;
+        let moves = 1;
 
-        let isPlayerTurn = true;
+        function toss() {
+            isPlayerTurn = Math.random() < 0.5;
+            messageElement.textContent = isPlayerTurn ? "Toss Result: You go first!" : "Toss Result: AI goes first!";
+            if (!isPlayerTurn) setTimeout(aiMove, 500);
+        }
 
         function createBoard() {
             boardElement.innerHTML = '';
-            board.forEach((cell, index) => {
+            board.fill(' ');
+            moves = 1;
+            toss();
+            board.forEach((_, index) => {
                 const cellElement = document.createElement('div');
-                cellElement.classList.add('cell');
+                cellElement.classList.add('cell', 'w-24', 'h-24', 'bg-gray-300', 'border-4', 'border-gray-700', 'flex', 'items-center', 'justify-center', 'text-6xl', 'font-extrabold', 'cursor-pointer', 'rounded-lg', 'shadow-md', 'hover:bg-gray-400', 'transition-all', 'duration-300');
                 cellElement.dataset.index = index;
-                cellElement.textContent = cell;
                 cellElement.addEventListener('click', () => handlePlayerMove(index));
                 boardElement.appendChild(cellElement);
             });
@@ -95,85 +42,66 @@
 
         async function handlePlayerMove(index) {
             if (board[index] !== ' ' || !isPlayerTurn) return;
-
             board[index] = 'O';
+            moves++;
             isPlayerTurn = false;
             updateBoard();
-            if (await checkWin('O')) {
-                messageElement.textContent = 'You win! ✌️👏';
-                disableBoard();
-                return;
-            }
-            if (isBoardFull()) {
-                messageElement.textContent = "It's a draw!";
-                disableBoard();
-                return;
-            }
+            if (await checkWin('O')) return;
+            if (moves === 10) {
+              checkWin('O');
+              checkWin('X');
+               return;
+             }
 
             setTimeout(aiMove, 500);
         }
 
         async function aiMove() {
-            const availablePositions = board
-                .map((cell, index) => (cell === ' ' ? index : null))
-                .filter(index => index !== null);
-            const move = availablePositions[Math.floor(Math.random() * availablePositions.length)];
-
+            let availablePositions = board.map((cell, index) => (cell === ' ' ? index : null)).filter(index => index !== null);
+            let move = availablePositions[Math.floor(Math.random() * availablePositions.length)];
             board[move] = 'X';
+            moves++;
             updateBoard();
-
-            if (await checkWin('X')) {
-                messageElement.textContent = 'AI wins! 🤖';
-                disableBoard();
-                return;
-            }
-            if (isBoardFull()) {
-                messageElement.textContent = "It's a draw!";
-                disableBoard();
-                return;
-            }
-
+            if (await checkWin('X')) return;
+            if (moves === 10) {
+              updateBoard();
+              checkWin('X');
+               return;
+             }
             isPlayerTurn = true;
         }
 
         function updateBoard() {
-            const cells = document.querySelectorAll('.cell');
-            cells.forEach((cell, index) => {
+            document.querySelectorAll('.cell').forEach((cell, index) => {
                 cell.textContent = board[index];
-                if (board[index] !== ' ') {
-                    cell.classList.add('taken');
-                }
+                if (board[index] !== ' ') cell.classList.add('pointer-events-none', 'text-white', board[index] === 'O' ? 'bg-green-500' : 'bg-red-500', 'shadow-lg');
             });
         }
 
         function checkWin(player) {
             const WINNING_COMBOS = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
-                [0, 4, 8], [2, 4, 6]             // diagonals
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
             ];
-
-            return WINNING_COMBOS.some(combo =>
-                combo.every(index => board[index] === player)
-            );
-        }
-
-        function isBoardFull() {
-            return board.every(cell => cell !== ' ');
+            if (WINNING_COMBOS.some(combo => combo.every(index => board[index] === player))) {
+                messageElement.textContent = player === 'O' ? "🎉 You win! 🎉" : "🤖 AI wins! 🤖";
+                disableBoard();
+                return true;
+            }
+            if (moves === 10) {
+                messageElement.textContent = "🤝 It's a Draw! 🤝";
+                disableBoard();
+                return true;
+            }
+            return false;
         }
 
         function disableBoard() {
-            const cells = document.querySelectorAll('.cell');
-            cells.forEach(cell => cell.classList.add('taken'));
+            document.querySelectorAll('.cell').forEach(cell => cell.classList.add('pointer-events-none'));
         }
 
-        restartButton.addEventListener('click', () => {
-            board.fill(' ');
-            isPlayerTurn = true;
-            messageElement.textContent = '';
-            createBoard();
-        });
-
+        restartButton.addEventListener('click', createBoard);
         createBoard();
     </script>
 </body>
