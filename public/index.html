@@ -6,12 +6,18 @@
     <title>Tic Tac Toe</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-r from-green-900 via-cyan-500 to-yellow-500 flex flex-col items-center justify-center h-screen">
-    <h1 class="text-5xl font-extrabold mb-8 text-white drop-shadow-lg">Tic Tac Toe</h1>
-    <div id="board" class="grid grid-cols-3 gap-3 p-4 bg-white/20 rounded-lg shadow-lg"></div>
-    <div id="message" class="mt-6 text-3xl font-semibold text-white bg-black/40 px-4 py-2 rounded-lg shadow-md"></div>
-    <button id="restart" class="mt-6 px-8 py-4 bg-blue-700 text-white text-lg font-bold rounded-lg shadow-lg hover:bg-blue-800 transition-all duration-300">Restart</button>
+<body class="bg-gradient-to-r from-green-900 via-cyan-500 to-yellow-500 flex flex-col items-center justify-center min-h-screen p-6">
+    <h1 class="text-6xl font-extrabold mb-10 text-white drop-shadow-2xl tracking-widest">Tic Tac Toe</h1>
+    
+    <div id="board" class="grid grid-cols-3 gap-4 p-6 bg-white/30 rounded-xl shadow-2xl backdrop-blur-lg border border-white/40">
+        <!-- Game cells go here -->
+    </div>
 
+    <div id="message" class="mt-6 text-3xl font-semibold text-white bg-black/50 px-6 py-3 rounded-lg shadow-md backdrop-blur-md"></div>
+
+    <button id="restart" class="mt-8 px-10 py-4 bg-blue-700 text-white text-xl font-bold rounded-xl shadow-lg hover:bg-blue-800 hover:scale-105 transition-transform duration-300">
+        Restart
+    </button>
     <script>
         const board = Array(9).fill(' ');
         const boardElement = document.getElementById('board');
