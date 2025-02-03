@@ -8,7 +8,7 @@
 </head>
 <body class="bg-gradient-to-r from-green-900 via-cyan-500 to-yellow-500 flex flex-col items-center justify-center h-screen">
     <h1 class="text-5xl font-extrabold mb-8 text-white drop-shadow-lg">Tic Tac Toe</h1>
-    <div id="board" class="grid grid-cols-3 gap-3 p-4 bg-[#8B4513] rounded-lg shadow-lg"></div>
+    <div id="board" class="grid grid-cols-3 gap-3 p-4 bg-white/20 rounded-lg shadow-lg"></div>
     <div id="message" class="mt-6 text-3xl font-semibold text-white bg-black/40 px-4 py-2 rounded-lg shadow-md"></div>
     <button id="restart" class="mt-6 px-8 py-4 bg-blue-700 text-white text-lg font-bold rounded-lg shadow-lg hover:bg-blue-800 transition-all duration-300">Restart</button>
 
@@ -52,6 +52,7 @@
               checkWin('X');
                return;
              }
+
             setTimeout(aiMove, 500);
         }
 
@@ -73,19 +74,14 @@
         function updateBoard() {
             document.querySelectorAll('.cell').forEach((cell, index) => {
                 cell.textContent = board[index];
-                if (board[index] === 'O') {
-                    cell.classList.add('text-white', 'bg-green-500', 'hover:bg-white/80');
-                } else if (board[index] === 'X') {
-                    cell.classList.add('text-black', 'bg-red-500', 'hover:bg-black/80');
-                }
-                if (board[index] !== ' ') cell.classList.add('pointer-events-none', 'shadow-lg');
+                if (board[index] !== ' ') cell.classList.add('pointer-events-none', 'text-white', board[index] === 'O' ? 'bg-green-500' : 'bg-red-500', 'shadow-lg');
             });
         }
 
         function checkWin(player) {
             const WINNING_COMBOS = [
                 [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                [0, 3, 6], [1, 4, 7], [2, 4, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
                 [0, 4, 8], [2, 4, 6]
             ];
             if (WINNING_COMBOS.some(combo => combo.every(index => board[index] === player))) {
