@@ -39,7 +39,7 @@
             align-items: center;
             justify-content: center;
             font-size: 70px;
-            font-weight: bold;
+            font-weight:bolder;
             cursor: pointer;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             font-style: inherit;
@@ -57,7 +57,7 @@
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #007bff;
+            background-color: #0053ad;
             color: #fff;
             border: none;
             border-radius: 5px;
@@ -100,7 +100,7 @@
             isPlayerTurn = false;
             updateBoard();
             if (await checkWin('O')) {
-                messageElement.textContent = 'You win!';
+                messageElement.textContent = 'You win! ✌️👏';
                 disableBoard();
                 return;
             }
@@ -123,7 +123,7 @@
             updateBoard();
 
             if (await checkWin('X')) {
-                messageElement.textContent = 'AI wins!';
+                messageElement.textContent = 'AI wins! 🤖';
                 disableBoard();
                 return;
             }
