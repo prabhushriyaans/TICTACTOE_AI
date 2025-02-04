@@ -18,6 +18,7 @@
     <button id="restart" class="mt-8 px-10 py-4 bg-blue-700 text-white text-xl font-bold rounded-xl shadow-lg hover:bg-blue-800 hover:scale-105 transition-transform duration-300">
         Restart
     </button>
+
     <script>
         const board = Array(9).fill(' ');
         const boardElement = document.getElementById('board');
@@ -46,34 +47,25 @@
             });
         }
 
-        async function handlePlayerMove(index) {
+        function handlePlayerMove(index) {
             if (board[index] !== ' ' || !isPlayerTurn) return;
             board[index] = 'O';
             moves++;
             isPlayerTurn = false;
             updateBoard();
-            if (await checkWin('O')) return;
-            if (moves === 10) {
-              checkWin('O');
-              checkWin('X');
-               return;
-             }
+            if (checkWin('O')) return;
+            if (moves === 10) return;
 
             setTimeout(aiMove, 500);
         }
 
-        async function aiMove() {
-            let availablePositions = board.map((cell, index) => (cell === ' ' ? index : null)).filter(index => index !== null);
-            let move = availablePositions[Math.floor(Math.random() * availablePositions.length)];
-            board[move] = 'X';
+        function aiMove() {
+            const bestMove = findBestMove();
+            board[bestMove] = 'X';
             moves++;
             updateBoard();
-            if (await checkWin('X')) return;
-            if (moves === 10) {
-              updateBoard();
-              checkWin('X');
-               return;
-             }
+            if (checkWin('X')) return;
+            if (moves === 10) return;
             isPlayerTurn = true;
         }
 
@@ -105,6 +97,69 @@
 
         function disableBoard() {
             document.querySelectorAll('.cell').forEach(cell => cell.classList.add('pointer-events-none'));
+        }
+
+        function findBestMove() {
+            let bestVal = -Infinity;
+            let bestMove = -1;
+
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === ' ') {
+                    board[i] = 'X';
+                    let moveVal = minimax(0, false);
+                    board[i] = ' ';
+                    if (moveVal > bestVal) {
+                        bestMove = i;
+                        bestVal = moveVal;
+                    }
+                }
+            }
+            return bestMove;
+        }
+
+        function minimax(depth, isMax) {
+            let score = evaluate();
+
+            if (score === 10) return score - depth;
+            if (score === -10) return score + depth;
+            if (!board.includes(' ')) return 0;
+
+            if (isMax) {
+                let best = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === ' ') {
+                        board[i] = 'X';
+                        best = Math.max(best, minimax(depth + 1, false));
+                        board[i] = ' ';
+                    }
+                }
+                return best;
+            } else {
+                let best = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === ' ') {
+                        board[i] = 'O';
+                        best = Math.min(best, minimax(depth + 1, true));
+                        board[i] = ' ';
+                    }
+                }
+                return best;
+            }
+        }
+
+        function evaluate() {
+            const WINNING_COMBOS = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+            for (let combo of WINNING_COMBOS) {
+                if (board[combo[0]] === board[combo[1]] && board[combo[1]] === board[combo[2]]) {
+                    if (board[combo[0]] === 'X') return 10;
+                    if (board[combo[0]] === 'O') return -10;
+                }
+            }
+            return 0;
         }
 
         restartButton.addEventListener('click', createBoard);
