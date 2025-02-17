@@ -6,73 +6,89 @@
     <title>Tic Tac Toe</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-r from-green-900 via-cyan-500 to-yellow-500 flex flex-col items-center justify-center min-h-screen p-6">
-    <h1 class="text-6xl font-extrabold mb-10 text-white drop-shadow-2xl tracking-widest">Tic Tac Toe</h1>
+<body class="bg-gray-900 flex flex-col items-center justify-center min-h-screen p-6 text-white">
+    <h1 class="text-5xl font-bold mb-6 text-cyan-400">Tic Tac Toe</h1>
     
-    <div id="board" class="grid grid-cols-3 gap-4 p-6 bg-white/30 rounded-xl shadow-2xl backdrop-blur-lg border border-white/40">
-        <!-- Game cells go here -->
+    <div id="board" class="grid grid-cols-3 gap-2 p-6 bg-gray-800 rounded-lg shadow-xl">
+        <!-- Cells will be generated here -->
     </div>
 
-    <div id="message" class="mt-6 text-3xl font-semibold text-white bg-black/50 px-6 py-3 rounded-lg shadow-md backdrop-blur-md"></div>
+    <div id="message" class="mt-6 text-2xl font-semibold bg-black px-6 py-3 rounded-lg shadow-lg text-cyan-300">
+        Welcome to Tic Tac Toe!
+    </div>
 
-    <button id="restart" class="mt-8 px-10 py-4 bg-blue-700 text-white text-xl font-bold rounded-xl shadow-lg hover:bg-blue-800 hover:scale-105 transition-transform duration-300">
-        Restart
+    <button id="restart" class="mt-6 px-6 py-3 bg-blue-500 text-white text-lg font-bold rounded-lg hover:bg-blue-700">
+        Restart Game
     </button>
 
     <script>
-        const board = Array(9).fill(' ');
+        let board = Array(9).fill(' ');
+        let isPlayerTurn = true;
+        let moves = 0;
+
         const boardElement = document.getElementById('board');
         const messageElement = document.getElementById('message');
         const restartButton = document.getElementById('restart');
-        let isPlayerTurn;
-        let moves = 1;
-
-        function toss() {
-            isPlayerTurn = Math.random() < 0.5;
-            messageElement.textContent = isPlayerTurn ? "Toss Result: You go first!" : "Toss Result: AI goes first!";
-            if (!isPlayerTurn) setTimeout(aiMove, 500);
-        }
 
         function createBoard() {
+            board = Array(9).fill(' ');
+            moves = 0;
             boardElement.innerHTML = '';
-            board.fill(' ');
-            moves = 1;
-            toss();
-            board.forEach((_, index) => {
-                const cellElement = document.createElement('div');
-                cellElement.classList.add('cell', 'w-24', 'h-24', 'bg-gray-300', 'border-4', 'border-gray-700', 'flex', 'items-center', 'justify-center', 'text-6xl', 'font-extrabold', 'cursor-pointer', 'rounded-lg', 'shadow-md', 'hover:bg-gray-400', 'transition-all', 'duration-300');
-                cellElement.dataset.index = index;
-                cellElement.addEventListener('click', () => handlePlayerMove(index));
-                boardElement.appendChild(cellElement);
-            });
+            isPlayerTurn = Math.random() < 0.5;
+
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add(
+                    'cell', 'w-20', 'h-20', 'bg-gray-700', 'flex', 'items-center', 'justify-center', 
+                    'text-5xl', 'font-bold', 'cursor-pointer', 'rounded-lg', 'shadow-lg'
+                );
+                cell.dataset.index = i;
+                cell.addEventListener('click', () => handlePlayerMove(i));
+                boardElement.appendChild(cell);
+            }
+
+            messageElement.textContent = isPlayerTurn ? "You go first! 🎉" : "AI goes first 🤖";
+            
+            if (!isPlayerTurn) {
+                setTimeout(aiMove, 500);
+            }
         }
 
         function handlePlayerMove(index) {
             if (board[index] !== ' ' || !isPlayerTurn) return;
+
             board[index] = 'O';
             moves++;
-            isPlayerTurn = false;
             updateBoard();
-            if (checkWin('O')) return;
-            if (moves === 10) return;
 
-            setTimeout(aiMove, 500);
+            if (checkWin('O')) return;
+
+            isPlayerTurn = false;
+            if (moves < 9) setTimeout(aiMove, 500);
         }
 
         function aiMove() {
+            if (moves >= 9 || isPlayerTurn) return;
+
             const bestMove = findBestMove();
             board[bestMove] = 'X';
             moves++;
             updateBoard();
+
             if (checkWin('X')) return;
-            if (moves === 10) return;
+
             isPlayerTurn = true;
         }
 
         function updateBoard() {
             document.querySelectorAll('.cell').forEach((cell, index) => {
                 cell.textContent = board[index];
-                if (board[index] !== ' ') cell.classList.add('pointer-events-none', 'text-white', board[index] === 'O' ? 'bg-green-500' : 'bg-red-500', 'shadow-lg');
+                cell.classList.remove('cursor-pointer');
+                if (board[index] === 'O') {
+                    cell.classList.add('text-green-400');
+                } else if (board[index] === 'X') {
+                    cell.classList.add('text-red-400');
+                }
             });
         }
 
@@ -83,12 +99,12 @@
                 [0, 4, 8], [2, 4, 6]
             ];
             if (WINNING_COMBOS.some(combo => combo.every(index => board[index] === player))) {
-                messageElement.textContent = player === 'O' ? "🎉 You win! 🎉" : "🤖 AI wins! 🤖";
+                messageElement.textContent = player === 'O' ? "🎉 You win!" : "🤖 AI wins!";
                 disableBoard();
                 return true;
             }
-            if (moves === 10) {
-                messageElement.textContent = "🤝 It's a Draw! 🤝";
+            if (moves >= 9) {
+                messageElement.textContent = "🤝 It's a Draw!";
                 disableBoard();
                 return true;
             }
@@ -119,7 +135,6 @@
 
         function minimax(depth, isMax) {
             let score = evaluate();
-
             if (score === 10) return score - depth;
             if (score === -10) return score + depth;
             if (!board.includes(' ')) return 0;
