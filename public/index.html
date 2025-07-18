@@ -1,190 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic Tac Toe</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic Tac Toe Ultra</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: black;
+      color: white;
+      overflow-x: hidden;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      grid-template-rows: repeat(3, 120px);
+      gap: 10px;
+    }
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      font-weight: bold;
+      border: 4px solid white;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+    .cell:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #00fff7;
+    }
+    .cell.taken {
+      opacity: 0.8;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .scoreboard {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 40px;
+      gap: 40px;
+      font-size: 24px;
+    }
+    .scoreboard div {
+      text-align: center;
+    }
+    .neon-text {
+      text-shadow: 0 0 10px #00fff7, 0 0 20px #00fff7, 0 0 30px #00fff7;
+    }
+    select {
+      background: black;
+      color: #00fff7;
+      border: 2px solid #00fff7;
+      padding: 8px 16px;
+      font-size: 18px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+  </style>
 </head>
-<body class="bg-gray-900 flex flex-col items-center justify-center min-h-screen p-6 text-white">
-    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Press+Start+2P&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Press Start 2P', cursive;
-        }
-        .cell {
-            font-family: 'Bangers', cursive;
-            font-family:'Courier New', Courier, monospace;
-        }
-    </style>
-    <h1 class="text-5xl font-bold mb-6 text-cyan-400">Tic Tac Toe</h1>
-    
-    <div id="board" class="grid grid-cols-3 gap-2 p-6 bg-gray-800 rounded-lg shadow-xl">
-        <!-- Cells will be generated here -->
+<body class="flex flex-col items-center justify-center min-h-screen p-6">
+
+  <h1 class="text-6xl font-extrabold mb-10 neon-text">Tic Tac Toe</h1>
+
+  <div id="board" class="board glass"></div>
+
+  <div class="scoreboard">
+    <div>
+      <div>PLAYER 1 (X)</div>
+      <div id="player1-score">0</div>
     </div>
-
-    <div id="message" class="mt-6 text-2xl font-semibold bg-black px-6 py-3 rounded-lg shadow-lg text-cyan-300">
-        Welcome to Tic Tac Toe!
+    <div>
+      <div>TIE</div>
+      <div id="tie-score">0</div>
     </div>
+    <div>
+      <div>AI (O)</div>
+      <div id="player2-score">0</div>
+    </div>
+  </div>
 
-    <button id="restart" class="mt-6 px-6 py-3 bg-blue-500 text-white text-lg font-bold rounded-lg hover:bg-blue-700">
-        Restart Game
-    </button>
+  <div>
+    <label for="difficulty" class="text-xl mt-5 block text-center">Select Difficulty:</label>
+    <select id="difficulty">
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </div>
 
-    <script>
-        let board = Array(9).fill(' ');
-        let isPlayerTurn = true;
-        let moves = 0;
+  <div id="message" class="mt-10 text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
+    Welcome to Tic Tac Toe!
+  </div>
 
-        const boardElement = document.getElementById('board');
-        const messageElement = document.getElementById('message');
-        const restartButton = document.getElementById('restart');
+  <button id="restart" class="mt-10 px-10 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xl font-bold rounded-xl shadow-lg hover:from-pink-600 hover:to-purple-700 transition transform hover:scale-105">
+    Restart Game
+  </button>
 
-        function createBoard() {
-            board = Array(9).fill(' ');
-            moves = 0;
-            boardElement.innerHTML = '';
-            isPlayerTurn = Math.random() < 0.5;
-
-            for (let i = 0; i < 9; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add(
-    'cell', 'w-24', 'h-24', 'bg-gray-700', 'flex', 'items-center', 'justify-center', 
-    'text-8xl', 'font-bold', 'cursor-pointer', 'rounded-lg', 'shadow-lg', 'font-arcade'
-);
-
-                cell.dataset.index = i;
-                cell.addEventListener('click', () => handlePlayerMove(i));
-                boardElement.appendChild(cell);
-            }
-
-            messageElement.textContent = isPlayerTurn ? "You go first! 🎉" : "AI goes first 🤖";
-            
-            if (!isPlayerTurn) {
-                setTimeout(aiMove, 500);
-            }
-        }
-
-        function handlePlayerMove(index) {
-            if (board[index] !== ' ' || !isPlayerTurn) return;
-
-            board[index] = 'O';
-            moves++;
-            updateBoard();
-
-            if (checkWin('O')) return;
-
-            isPlayerTurn = false;
-            if (moves < 9) setTimeout(aiMove, 500);
-        }
-
-        function aiMove() {
-            if (moves >= 9 || isPlayerTurn) return;
-
-            const bestMove = findBestMove();
-            board[bestMove] = 'X';
-            moves++;
-            updateBoard();
-
-            if (checkWin('X')) return;
-
-            isPlayerTurn = true;
-        }
-
-        function updateBoard() {
-            document.querySelectorAll('.cell').forEach((cell, index) => {
-                cell.textContent = board[index];
-                cell.classList.remove('cursor-pointer');
-            });
-        }
-
-        function checkWin(player) {
-            const WINNING_COMBOS = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                [0, 3, 6], [1, 4, 7], [2, 5, 8],
-                [0, 4, 8], [2, 4, 6]
-            ];
-            if (WINNING_COMBOS.some(combo => combo.every(index => board[index] === player))) {
-                messageElement.textContent = player === 'O' ? "🎉 You win!" : "🤖 AI wins!";
-                disableBoard();
-                return true;
-            }
-            if (moves >= 9) {
-                messageElement.textContent = "🤝 It's a Draw!";
-                disableBoard();
-                return true;
-            }
-            return false;
-        }
-
-        function disableBoard() {
-            document.querySelectorAll('.cell').forEach(cell => cell.classList.add('pointer-events-none'));
-        }
-
-        function findBestMove() {
-            let bestVal = -Infinity;
-            let bestMove = -1;
-
-            for (let i = 0; i < 9; i++) {
-                if (board[i] === ' ') {
-                    board[i] = 'X';
-                    let moveVal = minimax(0, false);
-                    board[i] = ' ';
-                    if (moveVal > bestVal) {
-                        bestMove = i;
-                        bestVal = moveVal;
-                    }
-                }
-            }
-            return bestMove;
-        }
-
-        function minimax(depth, isMax) {
-            let score = evaluate();
-            if (score === 10) return score - depth;
-            if (score === -10) return score + depth;
-            if (!board.includes(' ')) return 0;
-
-            if (isMax) {
-                let best = -Infinity;
-                for (let i = 0; i < 9; i++) {
-                    if (board[i] === ' ') {
-                        board[i] = 'X';
-                        best = Math.max(best, minimax(depth + 1, false));
-                        board[i] = ' ';
-                    }
-                }
-                return best;
-            } else {
-                let best = Infinity;
-                for (let i = 0; i < 9; i++) {
-                    if (board[i] === ' ') {
-                        board[i] = 'O';
-                        best = Math.min(best, minimax(depth + 1, true));
-                        board[i] = ' ';
-                    }
-                }
-                return best;
-            }
-        }
-
-        function evaluate() {
-            const WINNING_COMBOS = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8],
-                [0, 3, 6], [1, 4, 7], [2, 5, 8],
-                [0, 4, 8], [2, 4, 6]
-            ];
-            for (let combo of WINNING_COMBOS) {
-                if (board[combo[0]] === board[combo[1]] && board[combo[1]] === board[combo[2]]) {
-                    if (board[combo[0]] === 'X') return 10;
-                    if (board[combo[0]] === 'O') return -10;
-                }
-            }
-            return 0;
-        }
-
-        restartButton.addEventListener('click', createBoard);
-        createBoard();
-    </script>
+  <script src="script.js"></script>
 </body>
 </html>
